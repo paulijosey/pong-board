@@ -7,6 +7,12 @@ class Player(models.Model):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
 
+    @property
+    def full_name(self):
+        """The players full name, first plus last name."""
+        full_name = f'{self.first_name} {self.last_name}'
+        return full_name
+
 
 class Match(models.Model):
     """Table for keeping track of game scores and winners."""
@@ -21,3 +27,17 @@ class Match(models.Model):
         """Get specified number of recent matches in descending date."""
         recent_matches = Match.objects.order_by('-datetime')[0:num_matches]
         return recent_matches
+
+    @property
+    def score(self):
+        """Hyphenated version of match score, i.e. 21-19"""
+        score = f'{self.winning_score}-{self.losing_score}'
+        return score
+    
+    @property
+    def description(self):
+        match_date = self.datetime.strftime('%m/%d/%Y')
+        description = (
+            f'{match_date}: {self.winner.full_name} defeated {self.loser.full_name} {self.score}'
+        )
+        return description

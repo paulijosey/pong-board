@@ -8,26 +8,33 @@ from leaderboard.models import Player, Match
 
 class PlayerModelTest(TestCase):
 
+    def setUp(self):
+        """Set up tests with example player."""
+        self.first_name = 'Bob'
+        self.last_name = 'Hope'
+        self.player = Player.objects.create(first_name=self.first_name, last_name=self.last_name)
+
     def test_first_name(self):
         """Test that the player model has a first name field."""
-        first_name = 'Bob'
-        player = Player.objects.create(first_name=first_name)
-        self.assertEqual(player.first_name, first_name)
+        self.assertEqual(self.player.first_name, self.first_name)
 
     def test_last_name(self):
         """Test that the player model has a last name field."""
-        last_name = 'Hope'
-        player = Player.objects.create(last_name=last_name)
-        self.assertEqual(player.last_name, last_name)
+        self.assertEqual(self.player.last_name, self.last_name)
+    
+    def test_full_name(self):
+        """Test that the player model has a full name property."""
+        expected_full_name = f'{self.first_name} {self.last_name}'
+        self.assertEqual(self.player.full_name, expected_full_name)
 
 
 class MatchModelTest(TestCase):
 
     def setUp(self):
         """Set up tests with example match."""
-        self.winner = Player.objects.create()
+        self.winner = Player.objects.create(first_name='Bob', last_name='Hope')
         self.winning_score = 21
-        self.loser = Player.objects.create()
+        self.loser = Player.objects.create(first_name='Sue', last_name='Hope')
         self.losing_score = 19
         self.current_datetime = timezone.now()
         self.match = Match.objects.create(
@@ -71,6 +78,29 @@ class MatchModelTest(TestCase):
         self.assertAlmostEqual(
             self.match.datetime, self.current_datetime, delta=timedelta(seconds=1)
         )
+
+    def test_score(self):
+        """
+        Test match model has a score property.
+
+        Score is a hyphenated version of the score, i.e. '21-19'.
+        """
+        expected_score = f'{self.winning_score}-{self.losing_score}'
+        self.assertEqual(self.match.score, expected_score)
+
+    def test_description(self):
+        """
+        Test match model has a description property.
+        
+        Match description is a short summary of the match, including
+        the date it was played, full name of players, winner, and score.
+        i.e. "05-23-2018: Bob Hope defeated Sue Hope 21-19".
+        """
+        expected_description = (
+            self.match.datetime.strftime('%m/%d/%Y') + ': Bob Hope defeated Sue Hope 21-19'
+        )
+        self.assertEqual(self.match.description, expected_description)
+
 
 
 class GetRecentMatchesTest(TestCase):
