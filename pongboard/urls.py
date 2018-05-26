@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from leaderboard.views import home_page
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', view=home_page, name='home')
 ]
