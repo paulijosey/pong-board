@@ -68,4 +68,50 @@ class MatchModelTest(TestCase):
         The datetime field should be automatically set to the current
         datetime.
         """
-        self.assertAlmostEqual(self.match.datetime, self.current_datetime, delta=timedelta(seconds=1))
+        self.assertAlmostEqual(
+            self.match.datetime, self.current_datetime, delta=timedelta(seconds=1)
+        )
+
+
+class GetRecentMatchesTest(TestCase):
+    
+    def test_get_recent_match(self):
+        """Test that a match is retrieved."""
+        match = Match.objects.create(
+            winner=Player.objects.create(),
+            winning_score=21,
+            loser=Player.objects.create(),
+            losing_score=19
+        )
+        fetched_matches = Match.get_recent_matches(num_matches=1)
+        self.assertEqual(fetched_matches[0], match)
+
+    def test_descending_order(self):
+        """Test that matches are returned in descending order."""
+        match1 = Match.objects.create(
+            winner=Player.objects.create(),
+            winning_score=21,
+            loser=Player.objects.create(),
+            losing_score=19
+        )
+        match2 = Match.objects.create(
+            winner=Player.objects.create(),
+            winning_score=21,
+            loser=Player.objects.create(),
+            losing_score=19
+        )
+        fetched_matches = Match.get_recent_matches(num_matches=2)
+        self.assertEqual(fetched_matches[0], match2)
+        self.assertEqual(fetched_matches[1], match1)
+
+    def test_num_matches(self):
+        """Test that only the specified number of matches are returned."""
+        for _ in range(10):
+            Match.objects.create(
+                winner=Player.objects.create(),
+                winning_score=21,
+                loser=Player.objects.create(),
+                losing_score=19
+            )
+        fetched_matches = Match.get_recent_matches(num_matches=5)
+        self.assertEqual(len(fetched_matches), 5)

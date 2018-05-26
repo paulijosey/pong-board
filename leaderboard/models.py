@@ -15,3 +15,9 @@ class Match(models.Model):
     loser = models.ForeignKey(Player, default=None, related_name='lost_matches')
     losing_score = models.IntegerField(default=None)
     datetime = models.DateTimeField(default=timezone.now)
+
+    @staticmethod
+    def get_recent_matches(num_matches: int):
+        """Get specified number of recent matches in descending date."""
+        recent_matches = Match.objects.order_by('-datetime')[0:num_matches]
+        return recent_matches
