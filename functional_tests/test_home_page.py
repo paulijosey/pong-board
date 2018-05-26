@@ -1,7 +1,11 @@
 """Functional tests for the home page."""
 
+from datetime import datetime
+
 from django.test import LiveServerTestCase
 from selenium import webdriver
+
+from leaderboard.models import Player, Match
 
 
 class LeaderboardHomePage(LiveServerTestCase):
@@ -32,7 +36,7 @@ class LeaderboardHomePage(LiveServerTestCase):
         self.assertEqual(table_headers[1].text, 'Name')
 
         # And he sees a table for most recent games
-        recent_games_table = self.browser.find_element_by_id('recent-games')
+        recent_matches_table = self.browser.find_element_by_id('recent-matches')
 
     def test_recent_games(self):
         """
@@ -43,10 +47,25 @@ class LeaderboardHomePage(LiveServerTestCase):
         or less games have been played, no link is present.
         """
         # Input 20 games
+        for _ in range(20):
+            Match.objects.create(
+                winner=Player.objects.create(first_name='Bob', last_name='Hope'),
+                loser=Player.objects.create(first_name='Sue', last_name='Hope'),
+                winning_score=21,
+                losing_score=19
+            )
 
         # Bob loads PongBoard
+        self.browser.get(self.live_server_url)
 
-        # He see all 20 games in the correct order
+        # He see all 20 games
+        recent_matches_table = self.browser.find_element_by_id('recent-matches')
+        recent_matches = recent_matches_table.find_elements_by_tag_name('tr')
+        self.assertEqual(len(recent_matches), 20)
+        expected_match_text = (datetime.now().strftime("%m/%d/%Y")
+            + ': Bob Hope defeats Sue Hope 21-19')
+        for game in recent_matches:
+            self.assertEqual(game.text, expected_match_text)
 
         # He doesn't see a link to load more
 
