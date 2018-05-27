@@ -1,6 +1,7 @@
 """Functional tests for the home page."""
 
 from datetime import datetime
+import time
 
 from django.test import LiveServerTestCase
 from selenium import webdriver
@@ -42,9 +43,7 @@ class LeaderboardHomePage(LiveServerTestCase):
         """
         Examine recent games on home page.
         
-        We want the home page to show the 20 most recent games. If more
-        than 20 games have been played, there's a load more link. If 20
-        or less games have been played, no link is present.
+        We want the home page to show the 20 most recent games.
         """
         # Input 20 games
         for _ in range(20):
@@ -62,17 +61,24 @@ class LeaderboardHomePage(LiveServerTestCase):
         recent_matches_table = self.browser.find_element_by_id('recent-matches')
         recent_matches = recent_matches_table.find_elements_by_tag_name('tr')
         self.assertEqual(len(recent_matches), 20)
-        expected_match_text = (datetime.now().strftime("%m/%d/%Y")
-            + ': Bob Hope defeats Sue Hope 21-19')
+        expected_match_text = (
+            datetime.now().strftime("%m/%d/%Y") + ': Bob Hope defeated Sue Hope 21-19'
+        )
         for game in recent_matches:
             self.assertEqual(game.text, expected_match_text)
 
-        # He doesn't see a link to load more
-
         # Input 1 more game
+        Match.objects.create(
+            winner=Player.objects.create(first_name='Bob', last_name='Hope'),
+            loser=Player.objects.create(first_name='Sue', last_name='Hope'),
+            winning_score=21,
+            losing_score=10
+        )
 
         # Bob refreshes the page, and sees the 20 most recent games
-
-        # He now sees a link to load more
-
-        self.fail('Finish testing!!!')
+        self.browser.refresh()
+        self.browser.implicitly_wait(1)
+        recent_matches_table = self.browser.find_element_by_id('recent-matches')
+        recent_matches = recent_matches_table.find_elements_by_tag_name('tr')
+        self.assertEqual(len(recent_matches), 20)
+        self.assertIn('21-10', recent_matches[0].text)

@@ -1,6 +1,9 @@
 from django.shortcuts import render
 
+from leaderboard.models import Match
+
 
 def home_page(request):
     """Render view for home page."""
-    return render(request, 'home.html')
+    recent_matches = Match.get_recent_matches(num_matches=20)
+    return render(request, 'home.html', {'recent_matches': recent_matches})

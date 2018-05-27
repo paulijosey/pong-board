@@ -17,6 +17,11 @@
         </table>
 
         <table id="recent-matches">
+            {% for match in recent_matches %}
+                <tr>
+                    <td>{{ match.description }}</td>
+                </tr>
+            {% endfor %}
         </table>
 
     </body>
