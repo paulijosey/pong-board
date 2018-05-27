@@ -16,11 +16,9 @@
             </tr>
         </table>
 
-        <table id="recent-matches">
+        <ul id="recent-matches" list-style-type="none">
             {% for match in recent_matches %}
-                <tr>
-                    <td>{{ match.description }}</td>
-                </tr>
+                <li>{{ match.description }}</li>
             {% endfor %}
         </table>
 

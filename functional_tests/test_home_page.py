@@ -59,7 +59,7 @@ class LeaderboardHomePage(LiveServerTestCase):
 
         # He see all 20 games
         recent_matches_table = self.browser.find_element_by_id('recent-matches')
-        recent_matches = recent_matches_table.find_elements_by_tag_name('tr')
+        recent_matches = recent_matches_table.find_elements_by_tag_name('li')
         self.assertEqual(len(recent_matches), 20)
         expected_match_text = (
             datetime.now().strftime("%m/%d/%Y") + ': Bob Hope defeated Sue Hope 21-19'
@@ -79,6 +79,6 @@ class LeaderboardHomePage(LiveServerTestCase):
         self.browser.refresh()
         self.browser.implicitly_wait(1)
         recent_matches_table = self.browser.find_element_by_id('recent-matches')
-        recent_matches = recent_matches_table.find_elements_by_tag_name('tr')
+        recent_matches = recent_matches_table.find_elements_by_tag_name('li')
         self.assertEqual(len(recent_matches), 20)
         self.assertIn('21-10', recent_matches[0].text)
