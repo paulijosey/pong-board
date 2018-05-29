@@ -9,6 +9,15 @@
     <body>
         <h1>PongBoard</h1>
 
+        <form id="match-form">
+                <fieldset>
+                    <legend>Submit match:</legend>
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Submit Match">
+                </fieldset>
+            </form>
+
         <table id="leaderboard">
             <tr>
                 <th>Rank</th>
