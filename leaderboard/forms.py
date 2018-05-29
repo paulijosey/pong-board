@@ -25,6 +25,10 @@ class MatchForm(forms.ModelForm):
         cleaned_data = super().clean()
         winning_score = cleaned_data.get('winning_score')
         losing_score = cleaned_data.get('losing_score')
+        winner = cleaned_data.get('winner')
+        loser = cleaned_data.get('loser')
+        if winner == loser:
+            raise ValidationError('The winner and loser must be different players.')
         if winning_score < 21:
             raise ValidationError('Winning score must be 21 or greater.')
         if losing_score < 0:

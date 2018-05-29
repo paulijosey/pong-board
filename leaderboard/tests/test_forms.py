@@ -118,3 +118,15 @@ class MatchFormTest(TestCase):
         form = MatchForm()
         initial_winning_score = form['winning_score'].initial
         self.assertEqual(initial_winning_score, 21)
+
+    def test_players_different(self):
+        """Test that the players must be different."""
+        form = MatchForm(
+            data={
+                'winner': self.player1.id,
+                'loser': self.player1.id,
+                'winning_score': 21,
+                'losing_score': 19,
+            }
+        )
+        self.assertFalse(form.is_valid())
