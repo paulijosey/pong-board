@@ -5,6 +5,7 @@ import time
 
 from django.test import LiveServerTestCase
 from selenium import webdriver
+from selenium.webdriver.support.ui import Select
 
 from leaderboard.models import Player, Match
 
@@ -19,6 +20,20 @@ class LeaderboardHomePage(LiveServerTestCase):
     def tearDown(self):
         """Stop all tests by shutting down the browser."""
         self.browser.quit()
+
+    def submit_match(self, winner: str, loser: str, winning_score: int, losing_score: int):
+        """Submit a match through the website."""
+        match_form = self.browser.find_element_by_id('match-form')
+        winner_select = Select(match_form.find_element_by_name('winner'))
+        loser_select = Select(match_form.find_element_by_name('loser'))
+        winner_select.select_by_visible_text(winner)
+        loser_select.select_by_visible_text(loser)
+        match_form.find_element_by_name('winning_score').clear()
+        match_form.find_element_by_name('winning_score').send_keys(winning_score)
+        match_form.find_element_by_name('losing_score').clear()
+        match_form.find_element_by_name('losing_score').send_keys(losing_score)
+        match_form.submit()
+        time.sleep(1)  # allows page to refresh
 
     def test_load_home_page(self):
         """Load home page and check for expected tables."""
@@ -82,3 +97,96 @@ class LeaderboardHomePage(LiveServerTestCase):
         recent_matches = recent_matches_table.find_elements_by_tag_name('li')
         self.assertEqual(len(recent_matches), 20)
         self.assertIn('21-10', recent_matches[0].text)
+
+    def test_match_submission(self):
+        """
+        Test the match submission form.
+
+        The match submission form should have a field for the winning
+        player, winning score, losing player, and losing score. Upon
+        submission, the home page should refresh.
+        """
+        # Load database with Bob and Sue Hope
+        Player.objects.create(first_name='Bob', last_name='Hope')
+        Player.objects.create(first_name='Sue', last_name='Hope')
+
+        # Bob loads PongBoard
+        self.browser.get(self.live_server_url)
+
+        # He sees the match submission form
+        match_form = self.browser.find_element_by_id('match-form')
+
+        # He has the option to select either him or Sue as the winner
+        winner_select = Select(match_form.find_element_by_name('winner'))
+        winner_options = []
+        for winner in winner_select.options:
+            winner_options.append(winner.text)
+        for player in ['Bob Hope', 'Sue Hope']:
+            self.assertIn(player, winner_options)
+
+        # He has the option to select either him or Sue as the loser
+        loser_select = Select(match_form.find_element_by_name('loser'))
+        loser_options = []
+        for loser in loser_select.options:
+            loser_options.append(loser.text)
+        for player in ['Bob Hope', 'Sue Hope']:
+            self.assertIn(player, loser_options)
+
+        # He tries to submit his winning match against Sue.
+        # He accidentally put himself as both the winner and loser.
+        self.submit_match(winner='Bob Hope', loser='Bob Hope', winning_score=20, losing_score=-1)
+
+        # He sees an error message and no matches were loaded.
+        error = self.browser.find_element_by_class_name('errorlist')
+        self.assertEqual(
+            'The winner and loser must be different players.',
+            error.text
+        )
+        recent_matches_table = self.browser.find_element_by_id('recent-matches')
+        recent_matches = recent_matches_table.find_elements_by_tag_name('li')
+        self.assertEqual(len(recent_matches), 0)
+
+        # He tries to correct his error and resubmit, but gets another error.
+        # This time his winning score is not high enough.
+        self.submit_match(winner='Bob Hope', loser='Sue Hope', winning_score=20, losing_score=-1)
+        error = self.browser.find_element_by_class_name('errorlist')
+        self.assertEqual(
+            'Winning score must be 21 or greater.',
+            error.text
+        )
+
+        # He tries to submit for a third time, but gets yet another error.
+        # This time, his losing score is too low.
+        # Bob is clearly drunk and can't enter his match details correctly...
+        # It makes you wonder how he managed to beat Sue whilst so drunk.
+        self.submit_match(winner='Bob Hope', loser='Sue Hope', winning_score=24, losing_score=-1)
+        error = self.browser.find_element_by_class_name('errorlist')
+        self.assertEqual(
+            'Losing score must be 0 or greater.',
+            error.text
+        )
+
+        # He tries again... but his winning score is too high relative to the losing score.
+        self.submit_match(winner='Bob Hope', loser='Sue Hope', winning_score=24, losing_score=19)
+        error = self.browser.find_element_by_class_name('errorlist')
+        self.assertEqual(
+            'Deuce game! Winner must win by exactly 2 points when above 21.',
+            error.text
+        )
+
+        # Bob is determined, and resubmits, but this time the losing score is too high.
+        self.submit_match(winner='Bob Hope', loser='Sue Hope', winning_score=24, losing_score=25)
+        error = self.browser.find_element_by_class_name('errorlist')
+        self.assertEqual(
+            'Losing score must be less than the winning score by at least 2 points.',
+            error.text
+        )
+
+        # Bob takes a nap, sobers up, and finally enters his match details correctly.
+        self.submit_match(winner='Bob Hope', loser='Sue Hope', winning_score=24, losing_score=22)
+
+        # He sees his match in recent matches!
+        recent_matches_table = self.browser.find_element_by_id('recent-matches')
+        recent_matches = recent_matches_table.find_elements_by_tag_name('li')
+        self.assertEqual(len(recent_matches), 1)
+        self.assertIn('24-22', recent_matches[0].text)

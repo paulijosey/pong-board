@@ -12,6 +12,7 @@ class PlayerModelTest(TestCase):
         """Set up tests with example player."""
         self.first_name = 'Bob'
         self.last_name = 'Hope'
+        self.full_name = f'{self.first_name} {self.last_name}'
         self.player = Player.objects.create(first_name=self.first_name, last_name=self.last_name)
 
     def test_first_name(self):
@@ -24,8 +25,11 @@ class PlayerModelTest(TestCase):
     
     def test_full_name(self):
         """Test that the player model has a full name property."""
-        expected_full_name = f'{self.first_name} {self.last_name}'
-        self.assertEqual(self.player.full_name, expected_full_name)
+        self.assertEqual(self.player.full_name, self.full_name)
+
+    def test_str_representation(self):
+        """Test that the string representation is the full name."""
+        self.assertEqual(str(self.player), self.full_name)
 
 
 class MatchModelTest(TestCase):

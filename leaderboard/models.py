@@ -7,6 +7,10 @@ class Player(models.Model):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
 
+    def __str__(self):
+        """Display player's full name as string object representation."""
+        return self.full_name
+
     @property
     def full_name(self):
         """The players full name, first plus last name."""
@@ -38,6 +42,6 @@ class Match(models.Model):
     def description(self):
         match_date = self.datetime.strftime('%m/%d/%Y')
         description = (
-            f'{match_date}: {self.winner.full_name} defeated {self.loser.full_name} {self.score}'
+            f'{match_date}: {self.winner} defeated {self.loser} {self.score}'
         )
         return description
