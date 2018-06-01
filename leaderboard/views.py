@@ -17,5 +17,5 @@ def home_page(request):
     return render(
         request,
         'home.html',
-        {'recent_matches': recent_matches, 'form': form}
+        {'recent_matches': recent_matches, 'match_form': form}
     )

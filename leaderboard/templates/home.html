@@ -9,11 +9,20 @@
     <body>
         <h1>PongBoard</h1>
 
+        <form id="player-form">
+            <fieldset>
+                <legend>Add player:</legend>
+                {% csrf_token %}
+                {{ player_form.as_p }}
+                <input type="submit" value="Add Player">
+            </fieldset>
+        </form>
+
         <form id="match-form" action="/" method="POST">
             <fieldset>
                 <legend>Submit match:</legend>
                 {% csrf_token %}
-                {{ form.as_p }}
+                {{ match_form.as_p }}
                 <input type="submit" value="Submit Match">
             </fieldset>
         </form>

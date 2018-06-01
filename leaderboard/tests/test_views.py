@@ -41,7 +41,7 @@ class HomePageTest(TestCase):
     def test_correct_form(self):
         """Test that the correct form is used."""
         response = self.client.get('/')
-        self.assertIsInstance(response.context['form'], MatchForm)
+        self.assertIsInstance(response.context['match_form'], MatchForm)
 
     def test_post_redirects(self):
         """Test that the post redirects back to home page."""
@@ -76,6 +76,6 @@ class HomePageTest(TestCase):
             self.match_submission_url,
             self.invalid_match_data
         )
-        form = response.context['form']
+        form = response.context['match_form']
         expected_form = MatchForm(self.invalid_match_data)
         self.assertEqual(form.as_p(), expected_form.as_p())
