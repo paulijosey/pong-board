@@ -40,13 +40,8 @@ class HomePageTest(TestCase):
 
     def test_correct_form(self):
         """Test that the correct form is used."""
-        response = self.client.post(
-            self.match_submission_url,
-            self.valid_match_data
-        )
-        form = response.context['form']
-        expected_form = MatchForm(self.invalid_match_data)
-        self.assertEqual(form.as_p(), expected_form.as_p())
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], MatchForm)
 
     def test_post_redirects(self):
         """Test that the post redirects back to home page."""
@@ -74,3 +69,13 @@ class HomePageTest(TestCase):
             response,
             'Losing score must be less than the winning score by at least 2 points.'
         )
+
+    def test_invalid_returns_form(self):
+        """Test that an invalid form is returned by the server."""
+        response = self.client.post(
+            self.match_submission_url,
+            self.invalid_match_data
+        )
+        form = response.context['form']
+        expected_form = MatchForm(self.invalid_match_data)
+        self.assertEqual(form.as_p(), expected_form.as_p())
