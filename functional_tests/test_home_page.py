@@ -42,6 +42,7 @@ class LeaderboardHomePage(LiveServerTestCase):
         player_form.find_element_by_name('first_name').send_keys(first_name)
         player_form.find_element_by_name('last_name').clear()
         player_form.find_element_by_name('last_name').send_keys(last_name)
+        player_form.submit()
         time.sleep(1)  # allows page to refresh
 
     def test_load_home_page(self):
@@ -232,5 +233,3 @@ class LeaderboardHomePage(LiveServerTestCase):
         for winner in winner_select.options:
             winner_options.append(winner.text)
         self.assertIn('Sue Hope', winner_options)
-
-        self.fail('Finish testing!!!')
