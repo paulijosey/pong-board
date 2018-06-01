@@ -7,6 +7,9 @@ class Player(models.Model):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
 
+    class Meta:
+        unique_together = ('first_name', 'last_name',)
+
     def __str__(self):
         """Display player's full name as string object representation."""
         return self.full_name

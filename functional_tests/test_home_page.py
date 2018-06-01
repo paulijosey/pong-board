@@ -35,6 +35,16 @@ class LeaderboardHomePage(LiveServerTestCase):
         match_form.submit()
         time.sleep(1)  # allows page to refresh
 
+    def add_player(self, first_name: str, last_name: str):
+        """Add a new player through the website."""
+        player_form = self.browser.find_element_by_id('player-form')
+        player_form.find_element_by_name('first_name').clear()
+        player_form.find_element_by_name('first_name').send_keys(first_name)
+        player_form.find_element_by_name('last_name').clear()
+        player_form.find_element_by_name('last_name').send_keys(last_name)
+        player_form.submit()
+        time.sleep(1)  # allows page to refresh
+
     def test_load_home_page(self):
         """Load home page and check for expected tables."""
         # Bob wants to checkout PongBoard!
@@ -190,3 +200,36 @@ class LeaderboardHomePage(LiveServerTestCase):
         recent_matches = recent_matches_table.find_elements_by_tag_name('li')
         self.assertEqual(len(recent_matches), 1)
         self.assertIn('24-22', recent_matches[0].text)
+
+    def test_player_submission(self):
+        """
+        Test that a new player can be submitted.
+        
+        The player submission form should have a field for player's
+        first and last names.
+        """
+        # Load database with Bob Hope
+        Player.objects.create(first_name='Bob', last_name='Hope')
+
+        # Bob loads PongBoard
+        self.browser.get(self.live_server_url)
+
+        # He just beat Sue, so he's excited to enter submit his match.
+        # First he needs to add the players. He tries to add himself.
+        self.add_player('Bob', 'Hope')
+
+        # He gets an error message; he forgot he was already added!
+        error = self.browser.find_element_by_class_name('errorlist')
+        self.assertEqual(
+            'Player has already been added with the same first and last name.',
+            error.text
+        )
+
+        # He adds Sue instead, and can now select her in the match submission form.
+        self.add_player('Sue', 'Hope')
+        match_form = self.browser.find_element_by_id('match-form')
+        winner_select = Select(match_form.find_element_by_name('winner'))
+        winner_options = []
+        for winner in winner_select.options:
+            winner_options.append(winner.text)
+        self.assertIn('Sue Hope', winner_options)

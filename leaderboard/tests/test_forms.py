@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from leaderboard.models import Player, Match
-from leaderboard.forms import MatchForm
+from leaderboard.forms import MatchForm, PlayerForm, DUPLICATE_ERROR
 
 
 class MatchFormTest(TestCase):
@@ -130,3 +130,50 @@ class MatchFormTest(TestCase):
             }
         )
         self.assertFalse(form.is_valid())
+
+
+class PlayerFormTest(TestCase):
+
+    def test_form_fields(self):
+        """
+        Test that the form has the expected fields.
+        
+        Expected fields include both first and last name.
+        """
+        form = PlayerForm()
+        expected_fields = ['first_name', 'last_name']
+        self.assertListEqual(list(form.fields), expected_fields)
+
+    def test_form_saves(self):
+        """Test that player is saved to database using form."""
+        form = PlayerForm(data={'first_name': 'Bob', 'last_name': 'Hope'})
+        form.save()
+        self.assertEqual(Player.objects.count(), 1)
+
+    def test_duplicate_full_name(self):
+        """Test that two full names can't be the same."""
+        PlayerForm(data={'first_name': 'Bob', 'last_name': 'Hope'}).save()
+        with self.assertRaises(ValueError):
+            PlayerForm(data={'first_name': 'Bob', 'last_name': 'Hope'}).save()
+
+    def test_duplicate_error_message(self):
+        """Test duplicate full name error message."""
+        PlayerForm(data={'first_name': 'Bob', 'last_name': 'Hope'}).save()
+        form = PlayerForm(data={'first_name': 'Bob', 'last_name': 'Hope'})
+        form.is_valid()
+        self.assertIn(
+            DUPLICATE_ERROR,
+            form.errors['__all__']
+        )
+
+    def test_capitalized_first_name(self):
+        """Test that the first name is capitalized."""
+        form = PlayerForm(data={'first_name': 'bob', 'last_name': 'Hope'})
+        form.is_valid()
+        self.assertEqual('Bob', form.cleaned_data['first_name'])
+
+    def test_capitalized_last_name(self):
+        """Test that the last name is capitalized."""
+        form = PlayerForm(data={'first_name': 'Bob', 'last_name': 'hope'})
+        form.is_valid()
+        self.assertEqual('Hope', form.cleaned_data['last_name'])
