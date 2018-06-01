@@ -1,7 +1,9 @@
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 
-from leaderboard.models import Match
+from leaderboard.models import Match, Player
+
+DUPLICATE_ERROR = 'Player has already been added with the same first and last name.'
 
 
 class MatchForm(forms.ModelForm):
@@ -41,3 +43,24 @@ class MatchForm(forms.ModelForm):
             raise ValidationError(
                 'Deuce game! Winner must win by exactly 2 points when above 21.'
             )
+
+
+class PlayerForm(forms.ModelForm):
+    """Form to add a new player."""
+    
+    class Meta:
+        model = Player
+        fields = ['first_name', 'last_name']
+        error_messages = {
+            NON_FIELD_ERRORS: {
+                'unique_together': DUPLICATE_ERROR,
+            }
+        }
+    
+    def clean_first_name(self):
+        """Capitalize first name."""
+        return self.cleaned_data.get('first_name').capitalize()
+
+    def clean_last_name(self):
+        """Capitalize last name."""
+        return self.cleaned_data.get('last_name').capitalize()
