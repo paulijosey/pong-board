@@ -220,7 +220,7 @@ class LeaderboardHomePage(LiveServerTestCase):
         # He gets an error message; he forgot he was already added!
         error = self.browser.find_element_by_class_name('errorlist')
         self.assertEqual(
-            'Player has already been added. Why duplicate work?!',
+            'Player has already been added with the same first and last name.',
             error.text
         )
 
