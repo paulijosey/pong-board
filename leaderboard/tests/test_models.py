@@ -108,13 +108,18 @@ class MatchModelTest(TestCase):
 
 
 class GetRecentMatchesTest(TestCase):
+
+    def setUp(self):
+        """Set up tests with players."""
+        self.player1 = Player.objects.create(first_name='Bob', last_name='Hope')
+        self.player2 = Player.objects.create(first_name='Sue', last_name='Hope')
     
     def test_get_recent_match(self):
         """Test that a match is retrieved."""
         match = Match.objects.create(
-            winner=Player.objects.create(),
+            winner=self.player1,
             winning_score=21,
-            loser=Player.objects.create(),
+            loser=self.player2,
             losing_score=19
         )
         fetched_matches = Match.get_recent_matches(num_matches=1)
@@ -123,15 +128,15 @@ class GetRecentMatchesTest(TestCase):
     def test_descending_order(self):
         """Test that matches are returned in descending order."""
         match1 = Match.objects.create(
-            winner=Player.objects.create(),
+            winner=self.player1,
             winning_score=21,
-            loser=Player.objects.create(),
+            loser=self.player2,
             losing_score=19
         )
         match2 = Match.objects.create(
-            winner=Player.objects.create(),
+            winner=self.player1,
             winning_score=21,
-            loser=Player.objects.create(),
+            loser=self.player2,
             losing_score=19
         )
         fetched_matches = Match.get_recent_matches(num_matches=2)
@@ -142,9 +147,9 @@ class GetRecentMatchesTest(TestCase):
         """Test that only the specified number of matches are returned."""
         for _ in range(10):
             Match.objects.create(
-                winner=Player.objects.create(),
+                winner=self.player1,
                 winning_score=21,
-                loser=Player.objects.create(),
+                loser=self.player2,
                 losing_score=19
             )
         fetched_matches = Match.get_recent_matches(num_matches=5)
