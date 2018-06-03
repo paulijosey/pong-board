@@ -71,11 +71,15 @@ class LeaderboardHomePage(LiveServerTestCase):
         
         We want the home page to show the 20 most recent games.
         """
+        # Load database with Bob and Sue Hope
+        bob = Player.objects.create(first_name='Bob', last_name='Hope')
+        sue = Player.objects.create(first_name='Sue', last_name='Hope')
+
         # Input 20 games
         for _ in range(20):
             Match.objects.create(
-                winner=Player.objects.create(first_name='Bob', last_name='Hope'),
-                loser=Player.objects.create(first_name='Sue', last_name='Hope'),
+                winner=bob,
+                loser=sue,
                 winning_score=21,
                 losing_score=19
             )
@@ -95,8 +99,8 @@ class LeaderboardHomePage(LiveServerTestCase):
 
         # Input 1 more game
         Match.objects.create(
-            winner=Player.objects.create(first_name='Bob', last_name='Hope'),
-            loser=Player.objects.create(first_name='Sue', last_name='Hope'),
+            winner=bob,
+            loser=sue,
             winning_score=21,
             losing_score=10
         )
@@ -234,3 +238,28 @@ class LeaderboardHomePage(LiveServerTestCase):
         for winner in winner_select.options:
             winner_options.append(winner.text)
         self.assertIn('Sue Hope', winner_options)
+
+    def test_leaderboard(self):
+        """
+        Test that the leaderboard shows players' rankings.
+        """
+        # Load database with Bob and Sue Hope
+        bob = Player.objects.create(first_name='Bob', last_name='Hope')
+        sue = Player.objects.create(first_name='Sue', last_name='Hope')
+
+        # Load database with one match
+        Match.objects.create(
+            winner=bob,
+            loser=sue,
+            winning_score=21,
+            losing_score=10
+        )
+
+        # Bob loads PongBoard and sees him ranked first, and Sue in second
+        self.browser.get(self.live_server_url)
+        player_rankings = self.browser.find_elements_by_id('player-ranking')
+        self.assertEqual(len(player_rankings), 2)
+        self.assertIn('Bob Hope', player_rankings[0].text)
+        self.assertIn('1015', player_rankings[0].text)
+        self.assertIn('Sue Hope', player_rankings[1].text)
+        self.assertIn('985', player_rankings[1].text)
