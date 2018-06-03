@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 
-from leaderboard.models import Match
+from leaderboard.models import Match, PlayerRating
 from leaderboard.forms import MatchForm, PlayerForm
 
 
 def home_page(request):
     """Render view for home page."""
     recent_matches = Match.get_recent_matches(num_matches=20)
+    leaderboard = PlayerRating.objects.all().order_by('-rating')
     match_form = MatchForm()
     player_form = PlayerForm()
     if request.method == 'POST':
@@ -26,6 +27,7 @@ def home_page(request):
         context={
             'recent_matches': recent_matches,
             'match_form': match_form,
-            'player_form': player_form
+            'player_form': player_form,
+            'leaderboard': leaderboard
         }
     )

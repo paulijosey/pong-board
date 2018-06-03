@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from leaderboard.rankings import EloRating
+
 
 class Player(models.Model):
     """Table for keeping player information."""
@@ -48,3 +50,24 @@ class Match(models.Model):
             f'{match_date}: {self.winner} defeated {self.loser} {self.score}'
         )
         return description
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        PlayerRating.generate_ratings()
+
+
+class PlayerRating(models.Model):
+    """Table for keeping track of a player's rating."""
+    player = models.OneToOneField(Player, default=None, primary_key=True)
+    rating = models.IntegerField(default=None, blank=False)
+
+    @staticmethod
+    def generate_ratings():
+        PlayerRating.objects.all().delete()
+        matches = Match.objects.all().order_by('datetime')
+        elo_rating = EloRating()
+        for match in matches:
+            elo_rating.update_ratings(match.winner, match.loser)
+        for player, rating in elo_rating.ratings.items():
+            PlayerRating.objects.create(player=player, rating=rating)
+

@@ -31,7 +31,15 @@
             <tr>
                 <th>Rank</th>
                 <th>Name</th>
+                <th>Points</th>
             </tr>
+            {% for ranking in leaderboard %}
+                <tr id='player-ranking'>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ ranking.player.full_name }}</td>
+                    <td>{{ ranking.rating }}</td>
+                </tr>
+            {% endfor %}
         </table>
 
         <ul id="recent-matches" list-style-type="none">

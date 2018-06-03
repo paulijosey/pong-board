@@ -1,9 +1,11 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
+import pytz
 
 from django.test import TestCase
 from django.utils import timezone
 
-from leaderboard.models import Player, Match
+from leaderboard.models import Player, Match, PlayerRating
+from leaderboard.rankings import DEFAULT_K_FACTOR, DEFAULT_ELO_RATING
 
 
 class PlayerModelTest(TestCase):
@@ -154,3 +156,78 @@ class GetRecentMatchesTest(TestCase):
             )
         fetched_matches = Match.get_recent_matches(num_matches=5)
         self.assertEqual(len(fetched_matches), 5)
+
+
+class PlayerRatingTest(TestCase):
+
+    def setUp(self):
+        """Set up tests with example match."""
+        self.player1 = Player.objects.create(first_name='Bob', last_name='Hope')
+        self.player2 = Player.objects.create(first_name='Sue', last_name='Hope')
+
+    def test_foreign_key_player(self):
+        """Test ranking has a player field foreign key."""
+        with self.assertRaises(ValueError):
+            PlayerRating.objects.create(player='Joe Hope')
+        PlayerRating.objects.create(player=self.player1, rating=1000)  # should not raise error
+
+    def test_player_primary_key(self):
+        """Test ranking's player field is primary key."""
+        ranking = PlayerRating.objects.create(player=self.player2, rating=1000)
+        self.assertEqual(ranking.pk, ranking.player.id)
+        self.assertNotEqual(ranking.pk, 1)  # assert keys aren't equal coincidentally
+
+    def test_rating(self):
+        """Test that the ranking model has a rating field."""
+        ranking = PlayerRating.objects.create(player=self.player1, rating=1000.5145)
+        self.assertEqual(ranking.rating, 1000.5145)
+
+    def test_match_adds_player_ranking(self):
+        """Test that match submission adds player rankings."""
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19
+        )
+        PlayerRating.objects.get(pk=self.player1.id)  # should not raise error
+        PlayerRating.objects.get(pk=self.player2.id)  # should not raise error
+
+    def test_player_ratings(self):
+        """Test that player ratings are saved properly after match."""
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        ranking2 = PlayerRating.objects.get(pk=self.player2.id)
+        self.assertEqual(ranking1.rating, DEFAULT_ELO_RATING + DEFAULT_K_FACTOR / 2)
+        self.assertEqual(ranking2.rating, DEFAULT_ELO_RATING - DEFAULT_K_FACTOR / 2)
+
+    def test_generate_ratings(self):
+        """
+        Test that ratings are generated in correcet match order.
+        
+        If player 1 wins against player 2 first, then player 2 wins
+        against player 1, player 2 will have a higher rating (i.e.
+        it's dependent on the order of the matches)
+        """
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2000, 1, 1))
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        ranking2 = PlayerRating.objects.get(pk=self.player2.id)
+        self.assertGreater(ranking2.rating, ranking1.rating)
