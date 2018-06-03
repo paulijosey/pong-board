@@ -60,6 +60,7 @@ class LeaderboardHomePage(LiveServerTestCase):
         table_headers = leaderboard_table.find_elements_by_tag_name('th')
         self.assertEqual(table_headers[0].text, 'Rank')
         self.assertEqual(table_headers[1].text, 'Name')
+        self.assertEqual(table_headers[2].text, 'Points')
 
         # And he sees a table for most recent games
         recent_matches_table = self.browser.find_element_by_id('recent-matches')
