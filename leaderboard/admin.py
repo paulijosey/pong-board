@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from leaderboard.models import Player, Match, PlayerRating
+
+admin.site.register(Player)
+admin.site.register(Match)
