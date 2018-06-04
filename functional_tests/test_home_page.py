@@ -4,6 +4,10 @@ from datetime import datetime
 import time
 
 from django.test import LiveServerTestCase
+from django.contrib.auth.models import User
+from django.conf import settings
+from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY
+from django.contrib.sessions.backends.db import SessionStore
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
@@ -14,12 +18,29 @@ class LeaderboardHomePage(LiveServerTestCase):
     """Suite of tests to check for a leaderboard on the home page."""
         
     def setUp(self):
-        """Start all tests by setting up a browser."""
+        """Start all tests by setting up an authenticated browser."""
         self.browser = webdriver.Firefox()
 
     def tearDown(self):
         """Stop all tests by shutting down the browser."""
         self.browser.quit()
+
+    def create_preauthenticated_session(self):
+        """Login as authenticated user."""
+        username = 'bob'
+        password = 'bobistheman'
+        user = User.objects.create(username=username)
+        user.set_password(password)
+        user.save()
+        self.browser.get(self.live_server_url)
+        self.browser.find_element_by_id('login-link').click()
+        login_form = self.browser.find_element_by_id('login-form')
+        login_form.find_element_by_name('username').clear()
+        login_form.find_element_by_name('username').send_keys(username)
+        login_form.find_element_by_name('password').clear()
+        login_form.find_element_by_name('password').send_keys(password)
+        login_form.submit()
+        time.sleep(1)  # allows page to refresh
 
     def submit_match(self, winner: str, loser: str, winning_score: int, losing_score: int):
         """Submit a match through the website."""
@@ -121,6 +142,8 @@ class LeaderboardHomePage(LiveServerTestCase):
         player, winning score, losing player, and losing score. Upon
         submission, the home page should refresh.
         """
+        self.create_preauthenticated_session()
+
         # Load database with Bob and Sue Hope
         Player.objects.create(first_name='Bob', last_name='Hope')
         Player.objects.create(first_name='Sue', last_name='Hope')
@@ -213,6 +236,8 @@ class LeaderboardHomePage(LiveServerTestCase):
         The player submission form should have a field for player's
         first and last names.
         """
+        self.create_preauthenticated_session()
+        
         # Load database with Bob Hope
         Player.objects.create(first_name='Bob', last_name='Hope')
 
