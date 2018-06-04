@@ -31,6 +31,10 @@ class Match(models.Model):
     losing_score = models.IntegerField(default=None)
     datetime = models.DateTimeField(default=timezone.now)
 
+    def __str__(self):
+        """Display match description as string object representation."""
+        return self.description
+
     @staticmethod
     def get_recent_matches(num_matches: int):
         """Get specified number of recent matches in descending date."""
