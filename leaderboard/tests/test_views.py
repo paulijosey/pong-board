@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.utils.html import escape
+from django.contrib.auth.models import User
 
 from leaderboard.models import Player, Match
 from leaderboard.forms import MatchForm, PlayerForm, DUPLICATE_ERROR
@@ -9,6 +10,7 @@ class HomePageTest(TestCase):
     
     def setUp(self):
         """Set up tests with players."""
+        self.client.force_login(User.objects.create_user(username='testuser'))
         self.player1 = Player.objects.create(first_name='Bob', last_name='Hope')
         self.player2 = Player.objects.create(first_name='Sue', last_name='Hope')
         self.valid_match_data = {
