@@ -1,0 +1,1 @@
+web: gunicorn pongboard.wsgi --log-file -
