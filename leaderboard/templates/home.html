@@ -36,13 +36,23 @@
             <tr>
                 <th>Rank</th>
                 <th>Name</th>
-                <th>Points</th>
+                <th>Rating</th>
+                <th>GP</th>
+                <th>W</th>
+                <th>L</th>
+                <th>PPG</th>
+                <th>Diff</th>
             </tr>
             {% for ranking in leaderboard %}
                 <tr id='player-ranking'>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ ranking.player.full_name }}</td>
                     <td>{{ ranking.rating }}</td>
+                    <td>{{ ranking.games_played }}</td>
+                    <td>{{ ranking.wins }}</td>
+                    <td>{{ ranking.losses }}</td>
+                    <td>{{ ranking.points_per_game|floatformat }}</td>
+                    <td>{{ ranking.point_differential }}</td>
                 </tr>
             {% endfor %}
         </table>

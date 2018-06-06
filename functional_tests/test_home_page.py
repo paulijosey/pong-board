@@ -81,10 +81,15 @@ class LeaderboardHomePage(LiveServerTestCase):
         table_headers = leaderboard_table.find_elements_by_tag_name('th')
         self.assertEqual(table_headers[0].text, 'Rank')
         self.assertEqual(table_headers[1].text, 'Name')
-        self.assertEqual(table_headers[2].text, 'Points')
+        self.assertEqual(table_headers[2].text, 'Rating')
+        self.assertEqual(table_headers[3].text, 'GP')
+        self.assertEqual(table_headers[4].text, 'W')
+        self.assertEqual(table_headers[5].text, 'L')
+        self.assertEqual(table_headers[6].text, 'PPG')
+        self.assertEqual(table_headers[7].text, 'Diff')
 
         # And he sees a table for most recent games
-        recent_matches_table = self.browser.find_element_by_id('recent-matches')
+        self.browser.find_element_by_id('recent-matches')
 
     def test_recent_games(self):
         """
@@ -288,3 +293,5 @@ class LeaderboardHomePage(LiveServerTestCase):
         self.assertIn('1015', player_rankings[0].text)
         self.assertIn('Sue Hope', player_rankings[1].text)
         self.assertIn('985', player_rankings[1].text)
+
+        # TODO: test each line in leaderboard for specific stats

@@ -206,9 +206,9 @@ class PlayerRatingTest(TestCase):
         self.assertEqual(ranking1.rating, DEFAULT_ELO_RATING + DEFAULT_K_FACTOR / 2)
         self.assertEqual(ranking2.rating, DEFAULT_ELO_RATING - DEFAULT_K_FACTOR / 2)
 
-    def test_generate_ratings(self):
+    def test_generate_ratings_in_order(self):
         """
-        Test that ratings are generated in correcet match order.
+        Test that ratings are generated in correct match order.
         
         If player 1 wins against player 2 first, then player 2 wins
         against player 1, player 2 will have a higher rating (i.e.
@@ -231,3 +231,115 @@ class PlayerRatingTest(TestCase):
         ranking1 = PlayerRating.objects.get(pk=self.player1.id)
         ranking2 = PlayerRating.objects.get(pk=self.player2.id)
         self.assertGreater(ranking2.rating, ranking1.rating)
+
+    def test_games_played(self):
+        """Test property for number of games played."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2000, 1, 1))
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.games_played, 2)
+
+    def test_losses(self):
+        """Test property for number of losses."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.losses, 1)
+    
+    def test_wins(self):
+        """Test property for number of wins."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player2.id)
+        self.assertEqual(ranking1.wins, 1)
+
+    def test_points_won(self):
+        """Test property for total points won."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2000, 1, 1))
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.points_won, 40)
+
+    def test_points_lost(self):
+        """Test property for total points lost."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2000, 1, 1))
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.points_lost, 40)
+
+    def test_points_per_game(self):
+        """Test property for total points lost."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2000, 1, 1))
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.points_per_game, 20)
+
+    def test_point_differential(self):
+        """Test property for point differential."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.point_differential, -2)
