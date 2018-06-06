@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 from leaderboard.rankings import EloRating
@@ -67,6 +69,7 @@ class PlayerRating(models.Model):
 
     @staticmethod
     def generate_ratings():
+        """Generate ratings from all previous matches."""
         PlayerRating.objects.all().delete()
         matches = Match.objects.all().order_by('datetime')
         elo_rating = EloRating()
@@ -75,3 +78,55 @@ class PlayerRating(models.Model):
         for player, rating in elo_rating.ratings.items():
             PlayerRating.objects.create(player=player, rating=rating)
 
+    @property
+    def games_played(self):
+        """Returns the number of games played."""
+        games_played = self.wins + self.losses
+        return games_played
+        
+    @property
+    def losses(self):
+        """Returns the number of losses."""
+        losses = Match.objects.filter(loser=self.player).count()
+        return losses
+
+    @property
+    def wins(self):
+        """Returns the number of wins."""
+        wins = Match.objects.filter(winner=self.player).count()
+        return wins
+
+    @property
+    def points_won(self):
+        """Returns the number of points won."""
+        winning_matches = Match.objects.filter(winner=self.player)
+        losing_matches = Match.objects.filter(loser=self.player)
+        points_won = (
+            winning_matches.aggregate(points=Coalesce(Sum('winning_score'), 0))['points']
+            + losing_matches.aggregate(points=Coalesce(Sum('losing_score'), 0))['points']
+        )
+        return points_won
+
+    @property
+    def points_lost(self):
+        """Returns the number of points lost."""
+        winning_matches = Match.objects.filter(winner=self.player)
+        losing_matches = Match.objects.filter(loser=self.player)
+        points_lost = (
+            winning_matches.aggregate(points=Coalesce(Sum('losing_score'), 0))['points']
+            + losing_matches.aggregate(points=Coalesce(Sum('winning_score'), 0))['points']
+        )
+        return points_lost
+
+    @property
+    def points_per_game(self):
+        """Returns the number of wins."""
+        points_per_game = self.points_won / self.games_played
+        return points_per_game
+
+    @property
+    def point_differential(self):
+        """Return the points won minus points lost."""
+        point_differential = self.points_won - self.points_lost
+        return point_differential
+        
