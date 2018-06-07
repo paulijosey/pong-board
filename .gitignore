@@ -1,1 +1,4 @@
 __pycache__
+geckodriver.log
+.vscode
+db.sqlite3
