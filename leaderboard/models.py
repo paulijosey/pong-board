@@ -129,4 +129,9 @@ class PlayerRating(models.Model):
         """Return the points won minus points lost."""
         point_differential = self.points_won - self.points_lost
         return point_differential
-        
+
+    @property
+    def avg_point_differential(self):
+        """Return the avergae point differential."""
+        avg_point_differential = self.point_differential / self.games_played
+        return avg_point_differential
