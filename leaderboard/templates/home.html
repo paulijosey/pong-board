@@ -41,7 +41,7 @@
                 <th>W</th>
                 <th>L</th>
                 <th>PPG</th>
-                <th>Diff</th>
+                <th>AvgDiff</th>
             </tr>
             {% for ranking in leaderboard %}
                 <tr id='player-ranking'>
@@ -52,7 +52,7 @@
                     <td>{{ ranking.wins }}</td>
                     <td>{{ ranking.losses }}</td>
                     <td>{{ ranking.points_per_game|floatformat }}</td>
-                    <td>{{ ranking.point_differential }}</td>
+                    <td>{{ ranking.avg_point_differential|stringformat:"+.1f" }}</td>
                 </tr>
             {% endfor %}
         </table>
