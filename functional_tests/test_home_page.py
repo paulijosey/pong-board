@@ -86,7 +86,7 @@ class LeaderboardHomePage(LiveServerTestCase):
         self.assertEqual(table_headers[4].text, 'W')
         self.assertEqual(table_headers[5].text, 'L')
         self.assertEqual(table_headers[6].text, 'PPG')
-        self.assertEqual(table_headers[7].text, 'Diff')
+        self.assertEqual(table_headers[7].text, 'AvgDiff')
 
         # And he sees a table for most recent games
         self.browser.find_element_by_id('recent-matches')
