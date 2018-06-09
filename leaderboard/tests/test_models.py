@@ -362,3 +362,22 @@ class PlayerRatingTest(TestCase):
         )
         ranking1 = PlayerRating.objects.get(pk=self.player1.id)
         self.assertEqual(ranking1.avg_point_differential, -2)
+
+    def test_win_percent(self):
+        """Test property for win percentage."""
+        Match.objects.create(
+            winner=self.player2,
+            loser=self.player1,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2010, 1, 1)) 
+        )
+        Match.objects.create(
+            winner=self.player1,
+            loser=self.player2,
+            winning_score=21,
+            losing_score=19,
+            datetime=pytz.utc.localize(datetime(2000, 1, 1))
+        )
+        ranking1 = PlayerRating.objects.get(pk=self.player1.id)
+        self.assertEqual(ranking1.win_percent, 0.5)

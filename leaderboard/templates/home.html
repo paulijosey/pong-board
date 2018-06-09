@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+    {% load leaderboard_extras %}
+
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -40,6 +42,7 @@
                 <th>GP</th>
                 <th>W</th>
                 <th>L</th>
+                <th>Win%</th>
                 <th>PPG</th>
                 <th>AvgDiff</th>
             </tr>
@@ -51,6 +54,7 @@
                     <td>{{ ranking.games_played }}</td>
                     <td>{{ ranking.wins }}</td>
                     <td>{{ ranking.losses }}</td>
+                    <td>{{ ranking.win_percent|percentage:1 }}</td>
                     <td>{{ ranking.points_per_game|floatformat }}</td>
                     <td>{{ ranking.avg_point_differential|stringformat:"+.1f" }}</td>
                 </tr>
