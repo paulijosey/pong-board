@@ -23,6 +23,14 @@ spec:
               secretKeyRef:
                 name: pong-board
                 key: database-url
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: pong-board
+                key: django-secret-key
+          envFrom:
+            - configMapRef:
+                name: pong-board
         ports:
           - containerPort: 80
             name: http
