@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: pong-board
+  annotations:
+    kubernetes.io/ingress.class: internal
+  labels:
+    app: pong-board
+    component: app
+spec:
+  rules:
+  - host: { my configured hostname here }
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: pong-board
+          servicePort: 80

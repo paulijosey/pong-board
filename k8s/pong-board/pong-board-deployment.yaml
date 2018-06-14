@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pong-board
+  labels:
+    app: pong-board
+    component: app
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: pong-board
+        component: app
+    spec:
+      containers:
+      - name: pong-board
+        image: syargeau/pongboard:latest
+        imagePullPolicy: Always
+        env:
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: pong-board
+                key: database-url
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: pong-board
+                key: django-secret-key
+          envFrom:
+            - configMapRef:
+                name: pong-board
+        ports:
+          - containerPort: 80
+            name: http
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        name: cloudsql-proxy
+        command: ["/cloud_sql_proxy"]
+        args: ["-instances=$(CLOUDSQL_INSTANCE)=tcp:5432",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        env:
+          - name: CLOUDSQL_INSTANCE
+            valueFrom:
+              secretKeyRef:
+                name: pong-board
+                key: cloudsql-instance
+        volumeMounts:
+          - name: cloudsql-oauth-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+      volumes:
+        - name: cloudsql-oauth-credentials
+          secret:
+            secretName: pong-board-cloudsql-oauth-credentials
