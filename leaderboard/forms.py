@@ -8,6 +8,8 @@ DUPLICATE_ERROR = 'Player has already been added with the same first and last na
 
 class MatchForm(forms.ModelForm):
     """Form to submit a match result."""
+    winner = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'))
+    loser = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'))
     
     def __init__(self, *args, **kwargs):
         """Initialize form with initial winning score of 21."""
