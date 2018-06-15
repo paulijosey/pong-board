@@ -46,20 +46,37 @@
                 <th>PPG</th>
                 <th>AvgDiff</th>
             </tr>
-            {% for ranking in leaderboard %}
+            {% for ranked_player in ranked_players %}
                 <tr id='player-ranking'>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ ranking.player.full_name }}</td>
-                    <td>{{ ranking.rating }}</td>
-                    <td>{{ ranking.games_played }}</td>
-                    <td>{{ ranking.wins }}</td>
-                    <td>{{ ranking.losses }}</td>
-                    <td>{{ ranking.win_percent|percentage:1 }}</td>
-                    <td>{{ ranking.points_per_game|floatformat }}</td>
-                    <td>{{ ranking.avg_point_differential|stringformat:"+.1f" }}</td>
+                    <td>{{ ranked_player.player.full_name }}</td>
+                    <td>{{ ranked_player.rating }}</td>
+                    <td>{{ ranked_player.games_played }}</td>
+                    <td>{{ ranked_player.wins }}</td>
+                    <td>{{ ranked_player.losses }}</td>
+                    <td>{{ ranked_player.win_percent|percentage:1 }}</td>
+                    <td>{{ ranked_player.points_per_game|floatformat }}</td>
+                    <td>{{ ranked_player.avg_point_differential|stringformat:"+.1f" }}</td>
+                </tr>
+            {% endfor %}
+            {% for unranked_player in unranked_players %}
+                <tr id='player-ranking'>
+                    <td>N/A</td>
+                    <td>{{ unranked_player.player.full_name }}</td>
+                    <td>{{ unranked_player.rating }}</td>
+                    <td>{{ unranked_player.games_played }}</td>
+                    <td>{{ unranked_player.wins }}</td>
+                    <td>{{ unranked_player.losses }}</td>
+                    <td>{{ unranked_player.win_percent|percentage:1 }}</td>
+                    <td>{{ unranked_player.points_per_game|floatformat }}</td>
+                    <td>{{ unranked_player.avg_point_differential|stringformat:"+.1f" }}</td>
                 </tr>
             {% endfor %}
         </table>
+
+        {% if unranked_players %}
+            <p id='unranked-warning'>Note: you must play a minimum of 5 games before being ranked.</p>
+        {% endif %}
 
         <ul id="recent-matches" list-style-type="none">
             {% for match in recent_matches %}
