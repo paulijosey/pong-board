@@ -10,6 +10,7 @@ from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY
 from django.contrib.sessions.backends.db import SessionStore
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
 
 from leaderboard.models import Player, Match
 
@@ -286,7 +287,7 @@ class LeaderboardHomePage(LiveServerTestCase):
             losing_score=10
         )
 
-        # Bob loads PongBoard and sees him ranked first, and Sue in second
+        # Bob loads PongBoard and sees him above Sue
         self.browser.get(self.live_server_url)
         player_rankings = self.browser.find_elements_by_id('player-ranking')
         self.assertEqual(len(player_rankings), 2)
@@ -294,5 +295,27 @@ class LeaderboardHomePage(LiveServerTestCase):
         self.assertIn('1015', player_rankings[0].text)
         self.assertIn('Sue Hope', player_rankings[1].text)
         self.assertIn('985', player_rankings[1].text)
+
+        # However, he realizes they are unranked
+        self.assertIn('N/A', player_rankings[0].text)
+        unranked_warning = self.browser.find_element_by_id('unranked-warning')
+        self.assertEqual(
+            unranked_warning.text,
+            'Note: you must play a minimum of 5 games before being ranked.'
+        )
+
+        # Submit 4 more matches, and reload
+        for _ in range(4):
+            Match.objects.create(
+                winner=bob,
+                loser=sue,
+                winning_score=21,
+                losing_score=19
+            )
+        self.browser.get(self.live_server_url)
+
+        # They are now ranked, and the warning is no longer there
+        with self.assertRaises(NoSuchElementException):
+            self.browser.find_element_by_id('unranked-warning')
 
         # TODO: test each line in leaderboard for specific stats
