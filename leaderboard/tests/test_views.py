@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.utils.html import escape
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 
 from leaderboard.models import Player, Match
 from leaderboard.forms import MatchForm, PlayerForm, DUPLICATE_ERROR
@@ -140,3 +141,67 @@ class HomePageTest(TestCase):
         form = response.context['player_form']
         expected_form = PlayerForm(self.invalid_player_data)
         self.assertEqual(form.as_p(), expected_form.as_p())
+
+
+class AllMatchesTest(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        """Add matches to database for each test."""
+        super().setUpClass()  # Needed to run only once for all tests
+        cls.player1 = Player.objects.create(first_name='Bob', last_name='Hope')
+        cls.player2 = Player.objects.create(first_name='Sue', last_name='Hope')
+        for _ in range(51):
+            Match.objects.create(
+                winner=cls.player1,
+                loser=cls.player2,
+                winning_score=21,
+                losing_score=10
+            )
+
+    def test_correct_template(self):
+        """Test that the match HTML template is used."""
+        response = self.client.get('/matches/')
+        self.assertTemplateUsed(response, 'all_matches.html')
+
+    def test_paginator_with_all_matches(self):
+        """Test view has paginator with all matches."""
+        response = self.client.get('/matches/')
+        matches = response.context['matches']
+        self.assertEqual(matches.paginator.count, 51)
+
+    def test_num_pages(self):
+        """Test paginator has correct number of pages."""
+        response = self.client.get('/matches/')
+        matches = response.context['matches']
+        self.assertEqual(matches.paginator.num_pages, 2)
+
+    def test_returns_num_matches(self):
+        """Test that 50 matches are returned."""
+        response = self.client.get('/matches/')
+        matches = response.context['matches']
+        self.assertEqual(len(matches), 50)
+
+    def test_default_first_page(self):
+        """Test that the default page is page 1."""
+        response = self.client.get('/matches/')
+        matches = response.context['matches']
+        self.assertFalse(matches.has_previous())
+
+    def test_get_page(self):
+        """Test page requested through GET."""
+        response = self.client.get('/matches/?page=2')
+        matches = response.context['matches']
+        self.assertEqual(matches.number, 2)
+
+    def test_empty_page(self):
+        """Test empty page defaults to last page."""
+        response = self.client.get('/matches/?page=1000')
+        matches = response.context['matches']
+        self.assertFalse(matches.has_next())
+
+    def test_num_matches_last_page(self):
+        """Test that 1 match returned in last page."""
+        response = self.client.get('/matches/?page=2')
+        matches = response.context['matches']
+        self.assertEqual(len(matches), 1)

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>PongBoard - Matches</title>
+    </head>
+
+    <body>
+        <h1>All Matches</h1>
+
+        <table id="matches">
+            <tr>
+                <th>Date</th>
+                <th>Winner</th>
+                <th>Loser</th>
+                <th>Score</th>
+            </tr>
+            {% for match in matches %}
+                <tr id='match'>
+                    <td>{{ match.date }}</td>
+                    <td>{{ match.winner }}</td>
+                    <td>{{ match.loser }}</td>
+                    <td>{{ match.score }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <span id="paginator">
+            {% if matches.has_previous %}
+                <a id="previous-page-link" href="{% url 'all_matches' %}?page={{ matches.previous_page_number }}">Previous</a>
+            {% endif %}
+    
+            <span id="current-page">
+                Page {{ matches.number }} of {{ matches.paginator.num_pages }}
+            </span>
+    
+            {% if matches.has_next %}
+                <a id="next-page-link" href="{% url 'all_matches' %}?page={{ matches.next_page_number }}">Next</a>
+            {% endif %}
+        </span>
+     
+
+    </body>
