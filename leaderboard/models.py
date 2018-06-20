@@ -48,12 +48,17 @@ class Match(models.Model):
         """Hyphenated version of match score, i.e. 21-19"""
         score = f'{self.winning_score}-{self.losing_score}'
         return score
+
+    @property
+    def date(self):
+        """Date part of match datetime."""
+        date = self.datetime.strftime('%m/%d/%Y')
+        return date
     
     @property
     def description(self):
-        match_date = self.datetime.strftime('%m/%d/%Y')
         description = (
-            f'{match_date}: {self.winner} defeated {self.loser} {self.score}'
+            f'{self.date}: {self.winner} defeated {self.loser} {self.score}'
         )
         return description
 

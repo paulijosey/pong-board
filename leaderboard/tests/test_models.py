@@ -94,6 +94,16 @@ class MatchModelTest(TestCase):
         expected_score = f'{self.winning_score}-{self.losing_score}'
         self.assertEqual(self.match.score, expected_score)
 
+    def test_date(self):
+        """
+        Test match model has a date property.
+
+        Date is a truncated version of the datetime with only
+        the date part.
+        """
+        expected_date = self.match.datetime.strftime('%m/%d/%Y')
+        self.assertEqual(self.match.date, expected_date)
+
     def test_description(self):
         """
         Test match model has a description property.
