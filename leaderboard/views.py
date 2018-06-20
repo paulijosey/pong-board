@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 from leaderboard.models import Match, PlayerRating
 from leaderboard.forms import MatchForm, PlayerForm
@@ -32,5 +33,25 @@ def home_page(request):
             'player_form': player_form,
             'ranked_players': ranked_players,
             'unranked_players': unranked_players
+        }
+    )
+
+
+def all_matches(request):
+    """Render page to view all matches."""
+    all_matches = Match.objects.all().order_by('-datetime')
+    paginator = Paginator(all_matches, per_page=50)
+    page = request.GET.get('page')
+    try:
+        matches = paginator.page(page)
+    except PageNotAnInteger:  # occurs when no page is passed through
+        matches = paginator.page(1)
+    except EmptyPage:  # occurs when page is out of range
+        matches = paginator.page(paginator.num_pages)  # deliver last page of results
+    return render(
+        request,
+        'all_matches.html',
+        context={
+            'matches': matches
         }
     )
