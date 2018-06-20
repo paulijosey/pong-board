@@ -82,6 +82,7 @@
             {% for match in recent_matches %}
                 <li>{{ match.description }}</li>
             {% endfor %}
-        </table>
+        </ul>
+        <a id="all-matches-link" href="{% url 'all_matches' %}">See all matches</a>
 
     </body>
