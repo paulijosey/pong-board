@@ -1,3 +1,5 @@
+import leaderboard.models
+
 DEFAULT_ELO_RATING = 1000
 DEFAULT_K_FACTOR = 30
 
@@ -5,8 +7,12 @@ DEFAULT_K_FACTOR = 30
 class EloRating(object):
     """Uses Elo rating system to rate players."""
 
-    def __init__(self):
+    def __init__(self, use_current_ratings=False):
         self.ratings = {}
+        if use_current_ratings:
+            rated_players = leaderboard.models.PlayerRating.objects.all()
+            for rated_player in rated_players:
+                self.ratings[rated_player.player] = rated_player.rating
         
     def get_rating(self, player):
         """Return the rating of the specified player."""

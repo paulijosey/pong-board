@@ -238,6 +238,7 @@ class PlayerRatingTest(TestCase):
             losing_score=19,
             datetime=pytz.utc.localize(datetime(2000, 1, 1))
         )
+        PlayerRating.generate_ratings()
         ranking1 = PlayerRating.objects.get(pk=self.player1.id)
         ranking2 = PlayerRating.objects.get(pk=self.player2.id)
         self.assertGreater(ranking2.rating, ranking1.rating)
