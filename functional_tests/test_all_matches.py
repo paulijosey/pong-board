@@ -100,3 +100,10 @@ class AllMatchesTest(LiveServerTestCase):
         self.browser.find_element_by_id('previous-page-link').click()
         current_page = self.browser.find_element_by_id('current-page')
         self.assertEqual(current_page.text, 'Page 2 of 3')
+
+        # Lastly he see a link to go back to the home page, and clicks this
+        home_page_link = self.browser.find_element_by_id('home-page-link')
+        self.assertEqual(home_page_link.text, 'Back to leaderboard')
+        home_page_link.click()
+        home_url = self.live_server_url + '/'
+        self.assertEqual(home_url, self.browser.current_url)
