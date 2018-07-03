@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from leaderboard.rankings import EloRating, DEFAULT_ELO_RATING, DEFAULT_K_FACTOR
+from leaderboard.models import PlayerRating, Player
 
 
 class EloRatingTest(TestCase):
@@ -69,3 +70,11 @@ class EloRatingTest(TestCase):
         expected_loser_rating = DEFAULT_ELO_RATING - DEFAULT_K_FACTOR * 0.5
         self.assertEqual(winner_rating, expected_winner_rating)
         self.assertEqual(loser_rating, expected_loser_rating)
+
+    def test_use_current_rating(self):
+        """Test that the EloRating class can use current ratings."""
+        player = Player.objects.create(first_name='Bob', last_name='Hope')
+        test_rating = 1013
+        rated_player = PlayerRating.objects.create(player=player, rating=test_rating)
+        rating = EloRating(use_current_ratings=True)
+        self.assertEqual(test_rating, rating.get_rating(player))

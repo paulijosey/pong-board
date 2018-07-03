@@ -57,31 +57,43 @@ class Match(models.Model):
     
     @property
     def description(self):
+        """Description of who defeated who and what the score was."""
         description = (
             f'{self.date}: {self.winner} defeated {self.loser} {self.score}'
         )
         return description
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        PlayerRating.generate_ratings()
+        if self.id:  # occurs when the match already exists and is being updated
+            super().save(*args, **kwargs)
+            PlayerRating.generate_ratings()
+        else:  # occurs when it's a new match being added
+            super().save(*args, **kwargs)
+            elo_rating = EloRating(use_current_ratings=True)
+            elo_rating.update_ratings(self.winner, self.loser)
+            PlayerRating.add_ratings(elo_rating)
 
 
 class PlayerRating(models.Model):
     """Table for keeping track of a player's rating."""
     player = models.OneToOneField(Player, default=None, primary_key=True)
     rating = models.IntegerField(default=None, blank=False)
+    
+    @staticmethod
+    def add_ratings(elo_rating: EloRating):
+        """Add ratings to database given EloRating object."""
+        PlayerRating.objects.all().delete()
+        for player, rating in elo_rating.ratings.items():
+            PlayerRating.objects.create(player=player, rating=rating)
 
     @staticmethod
     def generate_ratings():
-        """Generate ratings from all previous matches."""
-        PlayerRating.objects.all().delete()
-        matches = Match.objects.all().order_by('datetime')
+        """Generate ratings from scratch based on all previous matches."""
         elo_rating = EloRating()
+        matches = Match.objects.all().order_by('datetime')
         for match in matches:
             elo_rating.update_ratings(match.winner, match.loser)
-        for player, rating in elo_rating.ratings.items():
-            PlayerRating.objects.create(player=player, rating=rating)
+        PlayerRating.add_ratings(elo_rating)
 
     @property
     def games_played(self):
