@@ -10,17 +10,18 @@ class MatchForm(forms.ModelForm):
     """Form to submit a match result."""
     winner = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'))
     loser = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'))
-    
-    def __init__(self, *args, **kwargs):
-        """Initialize form with initial winning score of 21."""
-        super().__init__(*args, **kwargs)
-        self.fields['winning_score'].initial = 21
 
-    class Meta:
+    def __init__(self, *args, **kwargs):
+        """Initialize form with initial winning score of 7."""
+        super().__init__(*args, **kwargs)
+        self.min_score = 7    
+        self.fields['winning_score'].initial = self.min_score
+
+    class Meta():
         model = Match
         fields = ['winner', 'winning_score', 'loser', 'losing_score']
         widgets = {
-            'winning_score': forms.NumberInput(attrs={'min': 21}),
+            'winning_score': forms.NumberInput(attrs={'min': 7}),
             'losing_score': forms.NumberInput(attrs={'min': 0}),
         }
 
@@ -33,17 +34,17 @@ class MatchForm(forms.ModelForm):
         loser = cleaned_data.get('loser')
         if winner == loser:
             raise ValidationError('The winner and loser must be different players.')
-        if winning_score < 21:
-            raise ValidationError('Winning score must be 21 or greater.')
+        if winning_score < self.min_score:
+            raise ValidationError('Winning score must be ' + self.min_score + ' or greater.')
         if losing_score < 0:
             raise ValidationError('Losing score must be 0 or greater.')
         if winning_score - losing_score < 2:
             raise ValidationError(
                 'Losing score must be less than the winning score by at least 2 points.'
             )
-        if winning_score > 21 and winning_score - losing_score != 2:
+        if winning_score > self.min_score and winning_score - losing_score != 2:
             raise ValidationError(
-                'Deuce game! Winner must win by exactly 2 points when above 21.'
+                'Deuce game! Winner must win by exactly 2 points when above ' + self.min_score + '.'
             )
 
 
