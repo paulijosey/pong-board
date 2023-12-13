@@ -38,7 +38,8 @@ class MatchForm(forms.ModelForm):
         if winner == loser:
             raise ValidationError('The winner and loser must be different players.')
         if winning_score < self.min_score:
-            raise ValidationError('Winning score must be ' + self.min_score + ' or greater.')
+            if winning_score != losing_score:
+                raise ValidationError('Winning score must be ' + self.min_score + ' or greater (except Draw).')
         if losing_score < 0:
             raise ValidationError('Losing score must be 0 or greater.')
         if winning_score == losing_score and draw == False:
