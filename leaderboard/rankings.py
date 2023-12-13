@@ -1,6 +1,6 @@
 import leaderboard.models
 
-DEFAULT_ELO_RATING = 1000
+DEFAULT_ELO_RATING = 1450
 DEFAULT_K_FACTOR = 30
 
 
@@ -19,8 +19,12 @@ class EloRating(object):
         try:
             rating = self.ratings[player]
         except KeyError:  # ocurrs when no rating for that player is present
-            rating = DEFAULT_ELO_RATING
+            rating = player.rating
         return rating
+    
+    def set_rating(self, player, rating):
+        """Set the rating of the specified player."""
+        self.ratings[player] = rating
     
     @staticmethod
     def calculate_expected_score(player_rating, opponent_rating):
@@ -35,22 +39,25 @@ class EloRating(object):
         opponent_rating = self.get_rating(opponent)
         return self.calculate_expected_score(player_rating, opponent_rating)
 
-    def calculate_new_ratings(self, winner_rating, loser_rating):
+    def calculate_new_ratings(self, winner_rating, loser_rating, draw=False):
         """Return the new ratings given the prior ratings."""
+        draw_var = 0.5 if draw else 0
         winner_expected_score = self.calculate_expected_score(winner_rating, loser_rating)
         loser_expected_score = self.calculate_expected_score(loser_rating, winner_rating)
-        new_winner_rating = winner_rating + DEFAULT_K_FACTOR * (1 - winner_expected_score)
-        new_loser_rating = loser_rating + DEFAULT_K_FACTOR * (0 - loser_expected_score)
+        new_winner_rating = winner_rating + DEFAULT_K_FACTOR * (1 - draw_var - winner_expected_score)
+        new_loser_rating  = loser_rating  + DEFAULT_K_FACTOR * (0 + draw_var - loser_expected_score)
         return new_winner_rating, new_loser_rating
 
-    def update_ratings(self, winner, loser):
+    def update_ratings(self, winner, loser, draw=False):
         """Update the Elo ratings based on match outcome."""
         winner_rating = self.get_rating(winner)
         loser_rating = self.get_rating(loser)
         new_winner_rating, new_loser_rating = self.calculate_new_ratings(
             winner_rating,
-            loser_rating
+            loser_rating,
+            draw=draw
         )
         self.ratings[winner] = new_winner_rating
         self.ratings[loser] = new_loser_rating
+        return new_winner_rating, new_loser_rating
     

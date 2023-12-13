@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
@@ -10,9 +11,10 @@ class Player(models.Model):
     """Table for keeping player information."""
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
+    rating = models.IntegerField(default=1450, blank=True, null=True)
 
     class Meta:
-        unique_together = ('first_name', 'last_name',)
+        unique_together = ('first_name', 'last_name')
 
     def __str__(self):
         """Display player's full name as string object representation."""
@@ -24,6 +26,19 @@ class Player(models.Model):
         full_name = f'{self.first_name} {self.last_name}'
         return full_name
 
+    def set_rating(self, rating: int):
+        """Set the rating of the specified player."""
+        self.rating = rating
+        self.save_without_elo_update()
+
+    def save_without_elo_update(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        elo_rating = EloRating(use_current_ratings=True)
+        elo_rating.set_rating(player=self, rating=self.rating)
+        PlayerRating.add_ratings(elo_rating)
 
 class Match(models.Model):
     """Table for keeping track of game scores and winners."""
@@ -32,6 +47,7 @@ class Match(models.Model):
     loser = models.ForeignKey(Player, default=None, related_name='lost_matches')
     losing_score = models.IntegerField(default=None)
     datetime = models.DateTimeField(default=timezone.now)
+    draw = models.BooleanField(default=False)
 
     def __str__(self):
         """Display match description as string object representation."""
@@ -58,19 +74,24 @@ class Match(models.Model):
     @property
     def description(self):
         """Description of who defeated who and what the score was."""
-        description = (
-            f'{self.date}: {self.winner} defeated {self.loser} {self.score}'
-        )
-        return description
+        if self.winning_score == self.losing_score:
+            description = (
+                f'{self.date}: {self.winner} drew {self.loser} {self.score}'
+            )
+            return description
+        else:
+            description = (
+                f'{self.date}: {self.winner} defeated {self.loser} {self.score}'
+            )
+            return description
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if self.id:  # occurs when the match already exists and is being updated
-            super().save(*args, **kwargs)
             PlayerRating.generate_ratings()
         else:  # occurs when it's a new match being added
-            super().save(*args, **kwargs)
             elo_rating = EloRating(use_current_ratings=True)
-            elo_rating.update_ratings(self.winner, self.loser)
+            elo_rating.update_ratings(self.winner, self.loser, self.winning_score == self.losing_score)
             PlayerRating.add_ratings(elo_rating)
 
 
@@ -85,6 +106,7 @@ class PlayerRating(models.Model):
         PlayerRating.objects.all().delete()
         for player, rating in elo_rating.ratings.items():
             PlayerRating.objects.create(player=player, rating=rating)
+            player.set_rating(rating)
 
     @staticmethod
     def generate_ratings():
@@ -92,26 +114,35 @@ class PlayerRating(models.Model):
         elo_rating = EloRating()
         matches = Match.objects.all().order_by('datetime')
         for match in matches:
-            elo_rating.update_ratings(match.winner, match.loser)
+            draw = match.winning_score == match.losing_score
+            elo_rating.update_ratings(match.winner, match.loser, draw=draw)
         PlayerRating.add_ratings(elo_rating)
 
     @property
     def games_played(self):
         """Returns the number of games played."""
-        games_played = self.wins + self.losses
+        games_played = self.wins + self.losses + self.draws
         return games_played
         
     @property
     def losses(self):
         """Returns the number of losses."""
-        losses = Match.objects.filter(loser=self.player).count()
+        # check for games where the player is the loser and its not a draw
+        losses = Match.objects.filter(loser=self.player).exclude(draw=True).count()
         return losses
 
     @property
     def wins(self):
         """Returns the number of wins."""
-        wins = Match.objects.filter(winner=self.player).count()
+        wins = Match.objects.filter(winner=self.player).exclude(draw=True).count()
         return wins
+
+    @property
+    def draws(self):
+        """Returns the number of wins."""
+        wins_draw = Match.objects.filter(winner=self.player).exclude(draw=False).count()
+        losses_draw = Match.objects.filter(loser=self.player).exclude(draw=False).count()
+        return wins_draw + losses_draw
 
     @property
     def points_won(self):
@@ -138,7 +169,10 @@ class PlayerRating(models.Model):
     @property
     def points_per_game(self):
         """Returns the number of wins."""
-        points_per_game = self.points_won / self.games_played
+        if self.games_played == 0:
+            points_per_game = 0
+        else:
+            points_per_game = self.points_won / self.games_played
         return points_per_game
 
     @property
@@ -149,12 +183,18 @@ class PlayerRating(models.Model):
 
     @property
     def avg_point_differential(self):
-        """Return the avergae point differential."""
-        avg_point_differential = self.point_differential / self.games_played
+        """Return the average point differential."""
+        if self.games_played == 0:
+            avg_point_differential = 0
+        else:
+            avg_point_differential = self.point_differential / self.games_played
         return avg_point_differential
 
     @property
     def win_percent(self):
         """Return the win percentage."""
-        win_percent = self.wins / self.games_played
+        if self.games_played == 0:
+            win_percent = 0
+        else:
+            win_percent = self.wins / self.games_played
         return win_percent
