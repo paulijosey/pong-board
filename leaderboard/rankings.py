@@ -19,7 +19,7 @@ class EloRating(object):
         try:
             rating = self.ratings[player]
         except KeyError:  # ocurrs when no rating for that player is present
-            rating = DEFAULT_ELO_RATING
+            rating = player.rating
         return rating
     
     def set_rating(self, player, rating):

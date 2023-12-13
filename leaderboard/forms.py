@@ -22,8 +22,8 @@ class MatchForm(forms.ModelForm):
         model = Match
         fields = ['winner', 'winning_score', 'loser', 'losing_score', 'draw']
         widgets = {
-            'winning_score': forms.NumberInput(attrs={'min': 7}),
-            'losing_score': forms.NumberInput(attrs={'min': 0}),
+            'winning_score': forms.NumberInput(attrs={'min': 6, 'max': 7}),
+            'losing_score': forms.NumberInput(attrs={'min': 0, 'max': 6}),
         }
 
     def clean(self):
