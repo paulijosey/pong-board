@@ -8,8 +8,10 @@ DUPLICATE_ERROR = 'Player has already been added with the same first and last na
 
 class MatchForm(forms.ModelForm):
     """Form to submit a match result."""
-    winner = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'))
-    loser = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'))
+    winner = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'),
+                                    widget=forms.Select(attrs={'class': 'form-control'}))
+    loser = forms.ModelChoiceField(queryset=Player.objects.order_by('first_name'),
+                                    widget=forms.Select(attrs={'class': 'form-control'}))
     draw = forms.CheckboxInput(attrs={'class': 'form-check-input'}),
 
     def __init__(self, *args, **kwargs):
@@ -22,8 +24,8 @@ class MatchForm(forms.ModelForm):
         model = Match
         fields = ['winner', 'winning_score', 'loser', 'losing_score', 'draw']
         widgets = {
-            'winning_score': forms.NumberInput(attrs={'min': 6, 'max': 7}),
-            'losing_score': forms.NumberInput(attrs={'min': 0, 'max': 6}),
+            'winning_score': forms.NumberInput(attrs={'min': 6, 'max': 7, 'class': 'form-control'}),
+            'losing_score': forms.NumberInput(attrs={'min': 0, 'max': 6, 'class': 'form-control'}),
         }
 
     def clean(self):
@@ -58,7 +60,9 @@ class MatchForm(forms.ModelForm):
 
 class PlayerForm(forms.ModelForm):
     """Form to add a new player."""
-    
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
     class Meta:
         model = Player
         fields = ['first_name', 'last_name', 'rating']

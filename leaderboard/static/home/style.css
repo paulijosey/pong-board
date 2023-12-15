@@ -1,0 +1,163 @@
+/* spacing */
+
+html {
+    font-family: 'Silkscreen', sans-serif;
+}
+
+.title {
+    font-size: 50px;
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    float: center;
+}
+
+#logout-link {
+    text-align: center;
+    margin-right: 100px;
+    margin-top: 100px;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+thead th,
+tfoot th,
+h1, 
+legend {
+    font-family: "Silkscreen", cursive;
+}
+
+th {
+    letter-spacing: 2px;
+}
+
+td {
+    letter-spacing: 1px;
+}
+
+tbody td {
+    text-align: center;
+}
+
+thead th {
+    text-align: center;
+}
+
+tfoot th {
+    text-align: right;
+}
+
+table {
+    table-layout: fixed;
+    width: 90%;
+    border-collapse: collapse;
+    border: 3px solid whitesmoke;
+    margin: 50px auto;
+}
+
+.forms {
+    width: 90%;
+    margin: 50px auto;
+    overflow: hidden;
+    border-collapse: collapse;
+}
+
+.form-div {
+    table-layout: fixed;
+    width: 90%;
+    border-collapse: collapse;
+    border: 3px solid whitesmoke;
+    margin: 50px auto;
+    height: 500px;
+    position: relative;
+}
+
+.submit-form {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 90%;
+}
+
+.submit-form-btn {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    /* width: 90%; */
+    /* float: right; */
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+#player-form-div {
+    margin-right: 50px auto;
+    width: 50%;
+    float: right;
+}
+
+#match-form-div {
+    margin-left: 50px auto;
+    width: 50%;
+    float: left;
+}
+
+thead th:nth-child(1) {
+    width: 5%;
+}
+
+thead th:nth-child(2) {
+    width: 20%;
+}
+
+thead th:nth-child(3) {
+    width: 10%;
+}
+
+thead th:nth-child(4) {
+    width: 5%;
+}
+
+thead th:nth-child(5) {
+    width: 5%;
+}
+
+thead th:nth-child(6) {
+    width: 5%;
+}
+
+thead th:nth-child(7) {
+    width: 5%;
+}
+
+thead th:nth-child(8) {
+    width: 5%;
+}
+
+thead th:nth-child(9) {
+    width: 5%;
+}
+
+thead th:nth-child(10) {
+    width: 5%;
+}
+
+th,
+td {
+    padding: 5px;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+tbody tr:nth-child(even) {
+  background-color: whitesmoke;
+}
+
+table {
+  background-color: white;
+}
