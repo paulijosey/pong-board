@@ -24,6 +24,10 @@
         {% if user.is_authenticated %}
         <a class="btn btn-danger" id='logout-link' href="{% url 'logout' %}">Logout</a>
     </div>
+
+    <div>
+        <h2 class="subtitle" id="leaderboard-title">Settings</h2>
+    </div>
     <!-- create two divs side by side -->
     <div class="forms">
         <div id="match-form-div" class="form-div">
@@ -53,60 +57,90 @@
     <a id='login-link' href="{% url 'login' %}">Login</a>
     {% endif %}
 
-    <table id="leaderboard">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Name</th>
-                <th>Rating</th>
-                <th>Games Played</th>
-                <th>Wins</th>
-                <th>Draws</th>
-                <th>Losses</th>
-                <th>Win%</th>
-                <th>PPG</th>
-                <th>AvgDiff</th>
+    <div>
+        <h2 class="subtitle" id="leaderboard-title">Leaderboard</h2>
+    </div>
+    <div style="overflow-x: auto;">
+        <table id="leaderboard">
+            <thead>
+                <tr>
+                    <th class="CellWithComment">Rank 
+                        <span class="CellComment">Note: you must play a minimum of 5 games before being ranked.</span>
+                    </th>
+                    <th>Name</th>
+                    <th>Rating</th>
+                    <th>Games Played</th>
+                    <th>Wins</th>
+                    <th>Draws</th>
+                    <th>Losses</th>
+                    <th>Win%</th>
+                    <th>PPG</th>
+                    <th>Avg Diff</th>
+                </tr>
+            </thead>
+            {% for ranked_player in ranked_players %}
+            <tr id='player-ranking'>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ ranked_player.player.full_name }}</td>
+                <td>{{ ranked_player.rating }}</td>
+                <td>{{ ranked_player.games_played }}</td>
+                <td>{{ ranked_player.wins }}</td>
+                <td>{{ ranked_player.draws }}</td>
+                <td>{{ ranked_player.losses }}</td>
+                <td>{{ ranked_player.win_percent|percentage:1 }}</td>
+                <td>{{ ranked_player.points_per_game|floatformat }}</td>
+                <td>{{ ranked_player.avg_point_differential|stringformat:"+.1f" }}</td>
             </tr>
-        </thead>
-        {% for ranked_player in ranked_players %}
-        <tr id='player-ranking'>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ ranked_player.player.full_name }}</td>
-            <td>{{ ranked_player.rating }}</td>
-            <td>{{ ranked_player.games_played }}</td>
-            <td>{{ ranked_player.wins }}</td>
-            <td>{{ ranked_player.draws }}</td>
-            <td>{{ ranked_player.losses }}</td>
-            <td>{{ ranked_player.win_percent|percentage:1 }}</td>
-            <td>{{ ranked_player.points_per_game|floatformat }}</td>
-            <td>{{ ranked_player.avg_point_differential|stringformat:"+.1f" }}</td>
-        </tr>
-        {% endfor %}
-        {% for unranked_player in unranked_players %}
-        <tr id='player-ranking'>
-            <td>N/A</td>
-            <td>{{ unranked_player.player.full_name }}</td>
-            <td>{{ unranked_player.rating }}</td>
-            <td>{{ unranked_player.games_played }}</td>
-            <td>{{ unranked_player.wins }}</td>
-            <td>{{ unranked_player.draws }}</td>
-            <td>{{ unranked_player.losses }}</td>
-            <td>{{ unranked_player.win_percent|percentage:1 }}</td>
-            <td>{{ unranked_player.points_per_game|floatformat }}</td>
-            <td>{{ unranked_player.avg_point_differential|stringformat:"+.1f" }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+            {% endfor %}
+            {% for unranked_player in unranked_players %}
+            <tr id='player-ranking'>
+                <td>N/A</td>
+                <td>{{ unranked_player.player.full_name }}</td>
+                <td>{{ unranked_player.rating }}</td>
+                <td>{{ unranked_player.games_played }}</td>
+                <td>{{ unranked_player.wins }}</td>
+                <td>{{ unranked_player.draws }}</td>
+                <td>{{ unranked_player.losses }}</td>
+                <td>{{ unranked_player.win_percent|percentage:1 }}</td>
+                <td>{{ unranked_player.points_per_game|floatformat }}</td>
+                <td>{{ unranked_player.avg_point_differential|stringformat:"+.1f" }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 
     {% if unranked_players %}
-    <p id='unranked-warning'>Note: you must play a minimum of 5 games before being ranked.</p>
+    <p id='unranked-warning'></p>
     {% endif %}
 
-    <ul id="recent-matches" list-style-type="none">
+    <div>
+        <h2 class="subtitle" id="leaderboard-title">Game History</h2>
+    </div>
+    <div style="overflow-x: auto;">
+        <table id="leaderboard">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Player 1</th>
+                    <th>Score</th>
+                    <th>Player</th>
+                </tr>
+            </thead>
+            {% for match in recent_matches %}
+            <tr id='matches'>
+                <td>{{ match.date }}</td>
+                <td>{{ match.winner }}</td>
+                <td>{{ match.score }}</td>
+                <td>{{ match.loser }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <!-- <ul id="recent-matches" list-style-type="none">
         {% for match in recent_matches %}
         <li>{{ match.description }}</li>
         {% endfor %}
-    </ul>
+    </ul> -->
     <a id="all-matches-link" href="{% url 'all_matches' %}">See all matches</a>
 
 </body>

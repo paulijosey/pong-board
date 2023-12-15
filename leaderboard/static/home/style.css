@@ -12,6 +12,14 @@ html {
     float: center;
 }
 
+.subtitle {
+    font-size: 30px;
+    text-align: left;
+    margin-top: 50px;
+    margin-left: 100px;
+    float: center;
+}
+
 #logout-link {
     text-align: center;
     margin-right: 100px;
@@ -24,6 +32,7 @@ html {
 thead th,
 tfoot th,
 h1, 
+h2, 
 legend {
     font-family: "Silkscreen", cursive;
 }
@@ -46,6 +55,10 @@ thead th {
 
 tfoot th {
     text-align: right;
+}
+
+.table-scrollable {
+    overflow-x: auto;
 }
 
 table {
@@ -82,7 +95,6 @@ table {
 }
 
 .submit-form-btn {
-    margin-top: 20px;
     margin-bottom: 20px;
     margin-left: 20px;
     margin-right: 20px;
@@ -104,47 +116,28 @@ table {
     width: 50%;
     float: left;
 }
-
-thead th:nth-child(1) {
-    width: 5%;
-}
-
-thead th:nth-child(2) {
-    width: 20%;
-}
-
-thead th:nth-child(3) {
-    width: 10%;
-}
-
-thead th:nth-child(4) {
-    width: 5%;
-}
-
-thead th:nth-child(5) {
-    width: 5%;
-}
-
-thead th:nth-child(6) {
-    width: 5%;
-}
-
-thead th:nth-child(7) {
-    width: 5%;
-}
-
-thead th:nth-child(8) {
-    width: 5%;
-}
-
-thead th:nth-child(9) {
-    width: 5%;
-}
-
-thead th:nth-child(10) {
-    width: 5%;
-}
-
+.CellWithComment{
+    position:relative;
+  }
+  
+  .CellComment{
+    display:none;
+    position:absolute; 
+    z-index:100;
+    border:1px;
+    background-color:white;
+    border-style:solid;
+    border-width:1px;
+    border-color:red;
+    padding:3px;
+    color:red; 
+    top:20px; 
+    left:20px;
+  }
+  
+  .CellWithComment:hover span.CellComment{
+    display:block;
+  }
 th,
 td {
     padding: 5px;
