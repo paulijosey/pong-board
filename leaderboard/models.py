@@ -42,9 +42,9 @@ class Player(models.Model):
 
 class Match(models.Model):
     """Table for keeping track of game scores and winners."""
-    winner = models.ForeignKey(Player, default=None, related_name='won_matches')
+    winner = models.ForeignKey(Player, default=None, related_name='won_matches', on_delete=models.CASCADE)
     winning_score = models.IntegerField(default=None)
-    loser = models.ForeignKey(Player, default=None, related_name='lost_matches')
+    loser = models.ForeignKey(Player, default=None, related_name='lost_matches', on_delete=models.CASCADE)
     losing_score = models.IntegerField(default=None)
     datetime = models.DateTimeField(default=timezone.now)
     draw = models.BooleanField(default=False)
@@ -97,7 +97,7 @@ class Match(models.Model):
 
 class PlayerRating(models.Model):
     """Table for keeping track of a player's rating."""
-    player = models.OneToOneField(Player, default=None, primary_key=True)
+    player = models.OneToOneField(Player, default=None, primary_key=True, on_delete=models.CASCADE)
     rating = models.IntegerField(default=None, blank=False)
     
     @staticmethod
@@ -140,9 +140,11 @@ class PlayerRating(models.Model):
     @property
     def draws(self):
         """Returns the number of wins."""
+        # draws = Match.objects.filter(winner=self.player, draw=True).count()
         wins_draw = Match.objects.filter(winner=self.player).exclude(draw=False).count()
         losses_draw = Match.objects.filter(loser=self.player).exclude(draw=False).count()
-        return wins_draw + losses_draw
+        draws = wins_draw + losses_draw
+        return draws
 
     @property
     def points_won(self):
