@@ -49,23 +49,6 @@
             </form>
         </div>
     </div>
-    <!-- <form id="player-form" action="/" method="POST">
-        <fieldset>
-            <legend>Add player:</legend>
-            {% csrf_token %}
-            {{ player_form.as_p }}
-            <input class="btn btn-success" type="submit" value="Add Player">
-        </fieldset>
-    </form>
-
-    <form id="match-form" action="/" method="POST">
-        <fieldset>
-            <legend>Submit match:</legend>
-            {% csrf_token %}
-            {{ match_form.as_p }}
-            <input  class="btn btn-success" type="submit" value="Submit Match">
-        </fieldset>
-    </form> -->
     {% else %}
     <a id='login-link' href="{% url 'login' %}">Login</a>
     {% endif %}
@@ -106,6 +89,7 @@
             <td>{{ unranked_player.rating }}</td>
             <td>{{ unranked_player.games_played }}</td>
             <td>{{ unranked_player.wins }}</td>
+            <td>{{ unranked_player.draws }}</td>
             <td>{{ unranked_player.losses }}</td>
             <td>{{ unranked_player.win_percent|percentage:1 }}</td>
             <td>{{ unranked_player.points_per_game|floatformat }}</td>

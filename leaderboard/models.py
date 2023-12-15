@@ -140,9 +140,11 @@ class PlayerRating(models.Model):
     @property
     def draws(self):
         """Returns the number of wins."""
+        # draws = Match.objects.filter(winner=self.player, draw=True).count()
         wins_draw = Match.objects.filter(winner=self.player).exclude(draw=False).count()
         losses_draw = Match.objects.filter(loser=self.player).exclude(draw=False).count()
-        return wins_draw + losses_draw
+        draws = wins_draw + losses_draw
+        return draws
 
     @property
     def points_won(self):
