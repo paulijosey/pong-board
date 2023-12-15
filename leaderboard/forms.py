@@ -63,6 +63,11 @@ class PlayerForm(forms.ModelForm):
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     rating = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['rating'].initial = 1450
+
     class Meta:
         model = Player
         fields = ['first_name', 'last_name', 'rating']
