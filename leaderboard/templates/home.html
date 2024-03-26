@@ -64,7 +64,7 @@
         <table id="leaderboard">
             <thead>
                 <tr>
-                    <th class="CellWithComment">Rank 
+                    <th class="CellWithComment">Rank
                         <span class="CellComment">Note: you must play a minimum of 5 games before being ranked.</span>
                     </th>
                     <th>Name</th>
@@ -129,9 +129,9 @@
             {% for match in recent_matches %}
             <tr id='matches'>
                 <td>{{ match.date }}</td>
-                <td>{{ match.winner }}</td>
+                <td>{{ match.winner }} ({{ match.winner_delta }})</td>
                 <td>{{ match.score }}</td>
-                <td>{{ match.loser }}</td>
+                <td>{{ match.loser }} ({{ match.loser_delta }})</td>
             </tr>
             {% endfor %}
         </table>
