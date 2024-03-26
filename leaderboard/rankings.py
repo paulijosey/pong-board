@@ -44,20 +44,22 @@ class EloRating(object):
         draw_var = 0.5 if draw else 0
         winner_expected_score = self.calculate_expected_score(winner_rating, loser_rating)
         loser_expected_score = self.calculate_expected_score(loser_rating, winner_rating)
-        new_winner_rating = winner_rating + DEFAULT_K_FACTOR * (1 - draw_var - winner_expected_score)
-        new_loser_rating  = loser_rating  + DEFAULT_K_FACTOR * (0 + draw_var - loser_expected_score)
-        return new_winner_rating, new_loser_rating
+        new_winner_rating = round(winner_rating + DEFAULT_K_FACTOR * (1 - draw_var - winner_expected_score))
+        new_loser_rating  = round(loser_rating  + DEFAULT_K_FACTOR * (0 + draw_var - loser_expected_score))
+        winner_rating_delta = new_winner_rating - winner_rating
+        loser_rating_delta = new_loser_rating - loser_rating
+        return new_winner_rating, new_loser_rating, winner_rating_delta, loser_rating_delta
 
     def update_ratings(self, winner, loser, draw=False):
         """Update the Elo ratings based on match outcome."""
         winner_rating = self.get_rating(winner)
         loser_rating = self.get_rating(loser)
-        new_winner_rating, new_loser_rating = self.calculate_new_ratings(
+        new_winner_rating, new_loser_rating, winner_rating_delta, loser_rating_delta = self.calculate_new_ratings(
             winner_rating,
             loser_rating,
             draw=draw
         )
         self.ratings[winner] = new_winner_rating
         self.ratings[loser] = new_loser_rating
-        return new_winner_rating, new_loser_rating
+        return new_winner_rating, new_loser_rating, winner_rating_delta, loser_rating_delta
     

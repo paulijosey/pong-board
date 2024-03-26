@@ -6,7 +6,6 @@ from django.utils import timezone
 
 from leaderboard.rankings import EloRating
 
-
 class Player(models.Model):
     """Table for keeping player information."""
     first_name = models.CharField(max_length=50, blank=False)
@@ -44,8 +43,10 @@ class Match(models.Model):
     """Table for keeping track of game scores and winners."""
     winner = models.ForeignKey(Player, default=None, related_name='won_matches', on_delete=models.CASCADE)
     winning_score = models.IntegerField(default=None)
+    winner_delta = models.IntegerField(default=None)
     loser = models.ForeignKey(Player, default=None, related_name='lost_matches', on_delete=models.CASCADE)
     losing_score = models.IntegerField(default=None)
+    loser_delta = models.IntegerField(default=None)
     datetime = models.DateTimeField(default=timezone.now)
     draw = models.BooleanField(default=False)
 
@@ -86,13 +87,16 @@ class Match(models.Model):
             return description
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         if self.id:  # occurs when the match already exists and is being updated
-            PlayerRating.generate_ratings()
+            winner_rating, loser_rating, winner_delta, loser_delta = PlayerRating.generate_ratings()
         else:  # occurs when it's a new match being added
             elo_rating = EloRating(use_current_ratings=True)
-            elo_rating.update_ratings(self.winner, self.loser, self.winning_score == self.losing_score)
+            winner_rating, loser_rating, winner_delta, loser_delta = elo_rating.update_ratings(self.winner, self.loser, self.winning_score == self.losing_score)
             PlayerRating.add_ratings(elo_rating)
+        self.winner_delta = winner_delta
+        self.loser_delta = loser_delta
+        super().save(*args, **kwargs)
+
 
 
 class PlayerRating(models.Model):
@@ -115,8 +119,9 @@ class PlayerRating(models.Model):
         matches = Match.objects.all().order_by('datetime')
         for match in matches:
             draw = match.winning_score == match.losing_score
-            elo_rating.update_ratings(match.winner, match.loser, draw=draw)
+            w_rating, l_rating, w_delta, l_delta = elo_rating.update_ratings(match.winner, match.loser, draw=draw)
         PlayerRating.add_ratings(elo_rating)
+        return w_rating, l_rating, w_delta, l_delta 
 
     @property
     def games_played(self):
