@@ -43,10 +43,10 @@ class Match(models.Model):
     """Table for keeping track of game scores and winners."""
     winner = models.ForeignKey(Player, default=None, related_name='won_matches', on_delete=models.CASCADE)
     winning_score = models.IntegerField(default=None)
-    winner_delta = models.IntegerField(default=None)
+    winner_delta = models.IntegerField(default=0)
     loser = models.ForeignKey(Player, default=None, related_name='lost_matches', on_delete=models.CASCADE)
     losing_score = models.IntegerField(default=None)
-    loser_delta = models.IntegerField(default=None)
+    loser_delta = models.IntegerField(default=0)
     datetime = models.DateTimeField(default=timezone.now)
     draw = models.BooleanField(default=False)
 
@@ -93,8 +93,8 @@ class Match(models.Model):
             elo_rating = EloRating(use_current_ratings=True)
             winner_rating, loser_rating, winner_delta, loser_delta = elo_rating.update_ratings(self.winner, self.loser, self.winning_score == self.losing_score)
             PlayerRating.add_ratings(elo_rating)
-        self.winner_delta = winner_delta
-        self.loser_delta = loser_delta
+        self.winner_delta_ = winner_delta
+        self.loser_delta_ = loser_delta
         super().save(*args, **kwargs)
 
 
